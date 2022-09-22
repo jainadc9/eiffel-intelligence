@@ -53,7 +53,7 @@ import lombok.Setter;
 
 public abstract class IntegrationTestBase extends AbstractTestExecutionListener {
     private static final int SECONDS_1 = 1000;
-    private static final int SECONDS_30 = 30000;
+    private static final int SECONDS_30 = 40000;
     private static final int DEFAULT_DELAY_BETWEEN_SENDING_EVENTS = 350;
     protected static final String MAILHOG_DATABASE_NAME = "mailhog";
 
