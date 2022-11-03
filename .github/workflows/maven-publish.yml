@@ -34,7 +34,7 @@ jobs:
          echo "${M2_HOME}/bin" >> $GITHUB_PATH
          
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -DskipTests -B package --file pom.xml
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn --batch-mode deploy
