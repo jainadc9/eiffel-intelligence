@@ -14,6 +14,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      M2_HOME: /opt/apache-maven-3.6.3
+      MAVEN_HOME: /opt/apache-maven-3.6.3
 
     steps:
     - uses: actions/checkout@v3
@@ -22,7 +25,14 @@ jobs:
       with:
         java-version: '8'
         distribution: 'temurin'
-
+        
+    - name: Install Maven
+      shell: bash
+      run: |  
+         wget https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz -P /tmp
+         tar xf /tmp/apache-maven-3.6.3-bin.tar.gz -C /opt
+         echo "${M2_HOME}/bin" >> $GITHUB_PATH
+         
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
