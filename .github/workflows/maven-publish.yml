@@ -37,6 +37,6 @@ jobs:
       run: mvn -DskipTests -B package --file pom.xml
 
     - name: Publish to GitHub Packages Apache Maven
-      run: mvn --batch-mode deploy
+      run: mvn -DskipTests --batch-mode deploy
       env:
         GITHUB_TOKEN: ${{ secrets.DEPLOY_GITHUB_TOKEN }}
