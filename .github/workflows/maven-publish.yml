@@ -32,9 +32,6 @@ jobs:
          wget https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz -P /tmp
          tar xf /tmp/apache-maven-3.6.3-bin.tar.gz -C /opt
          echo "${M2_HOME}/bin" >> $GITHUB_PATH
-         
-    - name: Build with Maven
-      run: mvn -DskipTests -B package --file pom.xml
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn -DskipTests --batch-mode deploy
