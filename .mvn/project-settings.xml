@@ -22,5 +22,11 @@
             <url>http://download.oracle.com/maven</url>
         </mirror>
     </mirrors>
-
+    <servers>
+        <server>
+            <id>github</id>
+            <username>jainadc9</username>
+            <password>${env.GITHUB_TOKEN}</password>
+        </server>
+    </servers>
 </settings>
