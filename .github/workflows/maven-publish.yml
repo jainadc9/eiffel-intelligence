@@ -20,7 +20,7 @@ jobs:
 
     steps:   
     - uses: actions/checkout@v3 
-    
+
     - name: Install Maven
       shell: bash
       run: |  
@@ -33,6 +33,9 @@ jobs:
       with:
         java-version: '8'
         distribution: 'temurin'
+        server-id: github
+        server-username: GITHUB_ACTOR
+        server-password: GITHUB_TOKEN
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn -DskipTests --batch-mode deploy
