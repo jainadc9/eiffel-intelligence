@@ -17,7 +17,10 @@ jobs:
     env:
       M2_HOME: /opt/apache-maven-3.6.3
       MAVEN_HOME: /opt/apache-maven-3.6.3
-     
+
+    steps:   
+    - uses: actions/checkout@v3 
+    
     - name: Install Maven
       shell: bash
       run: |  
@@ -25,14 +28,12 @@ jobs:
          tar xf /tmp/apache-maven-3.6.3-bin.tar.gz -C /opt
          echo "${M2_HOME}/bin" >> $GITHUB_PATH
 
-    steps:
-    - uses: actions/checkout@v3
     - name: Set up JDK 8
       uses: actions/setup-java@v3
       with:
         java-version: '8'
         distribution: 'temurin'
-        
+
     - name: Publish to GitHub Packages Apache Maven
       run: mvn -DskipTests --batch-mode deploy
       env:
