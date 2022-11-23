@@ -15,6 +15,7 @@
 package com.ericsson.ei.handlers;
 
 import java.net.URISyntaxException;
+import com.fasterxml.jackson.core.JsonParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +76,7 @@ public class UpStreamEventsHandler {
                 .getEventStreamDataById(aggregatedObjectId, SearchOption.UP_STREAM, -1, -1, true);
         long stop = System.currentTimeMillis();
         LOGGER.debug("%%%% Response time for upstream query for id: {}: {} ", aggregatedObjectId, stop-start);
-        LOGGER.info("ResponseEntity: " + responseEntity);
+        LOGGER.debug("ResponseEntity: " + responseEntity);
         
         if (responseEntity == null) {
             LOGGER.info("Asked for upstream from {} but got null response entity back!", aggregatedObjectId);
@@ -85,7 +86,14 @@ public class UpStreamEventsHandler {
         final String searchResultString = responseEntity.getBody();
         LOGGER.info("Search result string is: " + searchResultString);
         ObjectMapper mapper = new ObjectMapper();
-        final JsonNode searchResult = mapper.readTree(searchResultString);
+
+        try {
+            final JsonNode searchResult = mapper.readTree(searchResultString);
+        } catch (Exception JsonParseException){
+            LOGGER.info("Json Parse Exception");
+            return;
+        }
+
 
         if (searchResult == null) {
             LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
