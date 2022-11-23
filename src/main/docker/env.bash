@@ -16,7 +16,7 @@ export MONSTACHE_PORT=8086
 
 export MONGODB_IMAGE="mongo:latest"
 export RABBITMQ_IMAGE="bitnami/rabbitmq:3.8-debian-9"
-export EIFFEL_ER_IMAGE="eiffelericsson/eiffel-er:0.0.67"
+export EIFFEL_ER_IMAGE="eiffelericsson/eiffel-er:2.0.37"
 export JENKINS_IMAGE="bitnami/jenkins:2.138.3"
 export MAILSERVER_IMAGE="mailhog/mailhog"
 export EI_BACKEND_IMAGE="eiffelericsson/eiffel-intelligence-backend:1.0.1"
