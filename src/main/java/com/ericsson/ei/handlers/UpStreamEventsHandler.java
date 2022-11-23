@@ -89,30 +89,29 @@ public class UpStreamEventsHandler {
 
         try {
             final JsonNode searchResult = mapper.readTree(searchResultString);
+        
+            if (searchResult == null) {
+                LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
+                return;
+            }
+
+            final JsonNode upstreamLinkObjects = searchResult.get("upstreamLinkObjects");
+
+            if (upstreamLinkObjects == null) {
+                LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
+                return;
+            }
+
+            if (!upstreamLinkObjects.isArray()) {
+                LOGGER.warn("Expected upstreamLinkObjects to be an array but is: {}", upstreamLinkObjects.getNodeType());
+            }
+
+            // apply history extract rules on each node in the tree
+            traverseTree(upstreamLinkObjects, aggregatedObjectId, "");
         } catch (Exception JsonParseException){
             LOGGER.info("Json Parse Exception");
             return;
         }
-
-
-        if (searchResult == null) {
-            LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
-            return;
-        }
-
-        final JsonNode upstreamLinkObjects = searchResult.get("upstreamLinkObjects");
-
-        if (upstreamLinkObjects == null) {
-            LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
-            return;
-        }
-
-        if (!upstreamLinkObjects.isArray()) {
-            LOGGER.warn("Expected upstreamLinkObjects to be an array but is: {}", upstreamLinkObjects.getNodeType());
-        }
-
-        // apply history extract rules on each node in the tree
-        traverseTree(upstreamLinkObjects, aggregatedObjectId, "");
     }
 
     /**
