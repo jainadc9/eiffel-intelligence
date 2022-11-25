@@ -87,31 +87,28 @@ public class UpStreamEventsHandler {
         LOGGER.info("Search result string is: " + searchResultString);
         ObjectMapper mapper = new ObjectMapper();
 
-        try {
-            final JsonNode searchResult = mapper.readTree(searchResultString);
+
+        final JsonNode searchResult = mapper.readTree(searchResultString);
         
-            if (searchResult == null) {
-                LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
-                return;
-            }
-
-            final JsonNode upstreamLinkObjects = searchResult.get("upstreamLinkObjects");
-
-            if (upstreamLinkObjects == null) {
-                LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
-                return;
-            }
-
-            if (!upstreamLinkObjects.isArray()) {
-                LOGGER.warn("Expected upstreamLinkObjects to be an array but is: {}", upstreamLinkObjects.getNodeType());
-            }
-
-            // apply history extract rules on each node in the tree
-            traverseTree(upstreamLinkObjects, aggregatedObjectId, "");
-        } catch (Exception JsonParseException){
-            LOGGER.info("Json Parse Exception");
+        if (searchResult == null) {
+            LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
             return;
         }
+
+        final JsonNode upstreamLinkObjects = searchResult.get("upstreamLinkObjects");
+
+        if (upstreamLinkObjects == null) {
+            LOGGER.warn("Asked for upstream from {} but got null result back!", aggregatedObjectId);
+            return;
+        }
+
+        if (!upstreamLinkObjects.isArray()) {
+            LOGGER.warn("Expected upstreamLinkObjects to be an array but is: {}", upstreamLinkObjects.getNodeType());
+        }
+
+        // apply history extract rules on each node in the tree
+        traverseTree(upstreamLinkObjects, aggregatedObjectId, "");
+
     }
 
     /**

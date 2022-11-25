@@ -53,8 +53,8 @@ import lombok.Setter;
 
 public abstract class IntegrationTestBase extends AbstractTestExecutionListener {
     private static final int SECONDS_1 = 1000;
-    private static final int SECONDS_30 = 40000;
-    private static final int DEFAULT_DELAY_BETWEEN_SENDING_EVENTS = 1000;
+    private static final int SECONDS_30 = 30000;
+    private static final int DEFAULT_DELAY_BETWEEN_SENDING_EVENTS = 350;
     protected static final String MAILHOG_DATABASE_NAME = "mailhog";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTestBase.class);
@@ -217,7 +217,7 @@ public abstract class IntegrationTestBase extends AbstractTestExecutionListener 
      */
     protected void waitForEventsToBeProcessed(int eventsCount) throws InterruptedException {
         // wait for all events to be processed
-        long stopTime = System.currentTimeMillis() + SECONDS_30 + SECONDS_30;
+        long stopTime = System.currentTimeMillis() + SECONDS_30;
         long processedEvents = 0;
         while (processedEvents < eventsCount && stopTime > System.currentTimeMillis()) {
             processedEvents = countProcessedEvents(database, eventObjectMapCollectionName);
