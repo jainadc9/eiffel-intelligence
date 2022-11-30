@@ -147,7 +147,7 @@ public abstract class IntegrationTestBase extends AbstractTestExecutionListener 
      */
     protected void sendEventsAndConfirm(String aggregatedEvent) throws Exception {
         List<String> eventNames = getEventNamesToSend();
-        int eventsCount = eventNames.size() + extraEventsCount();
+        int eventsCount = eventNames.size();
 
         JsonNode parsedJSON = getJSONFromFile(getEventsFilePath());
         boolean alreadyExecuted = false;
