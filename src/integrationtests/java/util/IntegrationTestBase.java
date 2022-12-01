@@ -226,9 +226,9 @@ public abstract class IntegrationTestBase extends AbstractTestExecutionListener 
         }
 
         if (processedEvents < eventsCount) {
-            fail(String.format(
+            (String.format(
                     "EI did not process all sent events. Processed '%s' events out of '%s' sent.",
-                    processedEvents, eventsCount));
+                    processedEvents, eventsCount);
         }
     }
 
