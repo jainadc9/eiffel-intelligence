@@ -1,21 +1,20 @@
 {
-   "queryResponseEntity": {
-     "TemplateName": "SC_1",
-     "submission": {
+   "TemplateName": "SC_1",
+   "submission": {
        "eventId": "sb6efi4n-25fb-4d77-b9fd-5f2xrrefe66de47",
        "submitter": {
          "name": "Jane Doe",
          "id": "j_doe",
          "email": "jane.doe@company.com",
          "group": "Team Wombats"
-       },
-       "gitIdentifier": {
+    },
+   "gitIdentifier": {
          "repoName": "myPrivateRepo",
          "repoUri": "https://github.com/johndoe/myPrivateRepo.git",
          "commitId": "ad090b60a4aedc5161da9c035a49b14a319829b4",
          "branch": "myBranch"
        },
-       "confidenceLevels": [
+   "confidenceLevels": [
          {
            "eventId": "s37d59a3-169e-4f4c-8cc5-a52e73501a75",
            "name": "readyForDelivery",
@@ -28,12 +27,8 @@
            "time": 1481875944272,
            "value": "SUCCESS"
          }
-       ],
-       "time": 1234567890
-     },
-     "Time": {
-       "$date": "2022-12-01T14:17:04Z"
-     },
+      ],
+     "time": 1234567890,
      "_id": "sb6efi4n-25fb-4d77-b9fd-5f2xrrefe66de47",
      "id": "sb6efi4n-25fb-4d77-b9fd-5f2xrrefe66de47"
    }
