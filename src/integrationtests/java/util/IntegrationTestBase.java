@@ -324,7 +324,7 @@ public abstract class IntegrationTestBase extends AbstractTestExecutionListener 
             long stopTime = System.currentTimeMillis() + SECONDS_30;
             while (!foundMatch && stopTime > System.currentTimeMillis()) {
                 actualJSON = queryAggregatedObject(id);
-                Logger.info("Actual JSON" + actualJSON.toString());
+                LOGGER.info("Actual JSON" + actualJSON.toString());
 
                 /*
                  * This is a workaround for expectedJSON.equals(acutalJSON) as that does not work
