@@ -284,7 +284,7 @@ public class FlowStepsIT extends IntegrationTestBase {
 
         HttpRequest postRequest = new HttpRequest(HttpMethod.POST);
         postRequest.setHost(eiHost)
-                   .setPort(8090)
+                   .setPort(port)
                    .setEndpoint("/subscriptions")
                    .addHeader("Content-type", "application/json")
                    .setBody(subscriptionObject.getAsSubscriptions().toString());
