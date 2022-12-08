@@ -257,6 +257,8 @@ public class FlowStepsIT extends IntegrationTestBase {
                         amountOfMails, recipients.size());
 
                 long createdDateInMillis = getDateAsEpochMillis(newestMailJson);
+                LOGGER.info("Mail "+ createdDateInMillis);
+                LOGGER.info("Mail "+ startTime);
                 mailHasBeenDelivered = createdDateInMillis >= startTime;
             }
 
