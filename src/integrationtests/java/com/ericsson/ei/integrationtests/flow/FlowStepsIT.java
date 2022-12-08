@@ -48,6 +48,9 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import util.IntegrationTestBase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = App.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
