@@ -89,6 +89,8 @@ public class FlowStepsIT extends IntegrationTestBase {
     private SubscriptionObject subscriptionObject;
     private JSONObject jobStatusData;
     public String aggregatedEvent;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowStepsIT.class);
 
     @Given("^the rules \"([^\"]*)\"$")
     public void rules(String rulesFilePath) throws Throwable {

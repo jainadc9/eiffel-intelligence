@@ -125,9 +125,9 @@ public abstract class IntegrationTestBase extends AbstractTestExecutionListener 
         mongoDBHandler.dropCollection(database, sessionsCollectionName);
     }
 
-    public void setFirstEventWaitTime(int value) {
-        firstEventWaitTime = value;
-    }
+    // public void setFirstEventWaitTime(int value) {
+    //     firstEventWaitTime = value;
+    // }
 
     /**
      * Override this if you have more events that will be registered to event to object map but it
