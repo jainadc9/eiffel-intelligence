@@ -266,7 +266,7 @@ public class FlowStepsIT extends IntegrationTestBase {
                 TimeUnit.SECONDS.sleep(1);
             }
         }
-        assert (mailHasBeenDelivered) : "Mail was not triggered. createdDateInMillis is less than startTime.";
+        assertEquals("Mail was not triggered. createdDateInMillis is less than startTime.", true, mailHasBeenDelivered);
     }
 
     @Then("^jenkins is set up with job name \"([^\"]*)\"$")
