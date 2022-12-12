@@ -48,9 +48,6 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import util.IntegrationTestBase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = App.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -92,8 +89,6 @@ public class FlowStepsIT extends IntegrationTestBase {
     private SubscriptionObject subscriptionObject;
     private JSONObject jobStatusData;
     public String aggregatedEvent;
-    
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlowStepsIT.class);
 
     @Given("^the rules \"([^\"]*)\"$")
     public void rules(String rulesFilePath) throws Throwable {
@@ -250,7 +245,7 @@ public class FlowStepsIT extends IntegrationTestBase {
 
     @Then("^mongodb should contain \"([^\"]*)\" mails\\.$")
     public void mongodbShouldContainMails(int amountOfMails) throws Exception {
-        long stopTime = System.currentTimeMillis() + 30000;
+        long stopTime = System.currentTimeMillis() + 60000;
         Boolean mailHasBeenDelivered = false;
 
         while (mailHasBeenDelivered == false && stopTime > System.currentTimeMillis()) {
@@ -262,8 +257,8 @@ public class FlowStepsIT extends IntegrationTestBase {
                         amountOfMails, recipients.size());
 
                 long createdDateInMillis = getDateAsEpochMillis(newestMailJson);
-                LOGGER.info("Mail "+ createdDateInMillis);
-                LOGGER.info("Mail "+ startTime);
+                System.out.println("Mail "+ createdDateInMillis);
+                System.out.println("Mail "+ startTime);
                 mailHasBeenDelivered = createdDateInMillis >= startTime;
             }
 
