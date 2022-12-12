@@ -242,10 +242,10 @@ public class FlowStepsIT extends IntegrationTestBase {
     public void jenkinsJobShouldBeDeleted() throws Throwable {
         jenkinsManager.deleteJob(this.jenkinsJobName);
     }
-
+    @Ignore("not ready yet")
     @Then("^mongodb should contain \"([^\"]*)\" mails\\.$")
     public void mongodbShouldContainMails(int amountOfMails) throws Exception {
-        long stopTime = System.currentTimeMillis() + 60000;
+        long stopTime = System.currentTimeMillis() + 30000;
         Boolean mailHasBeenDelivered = false;
 
         while (mailHasBeenDelivered == false && stopTime > System.currentTimeMillis()) {
