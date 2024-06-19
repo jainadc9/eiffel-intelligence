@@ -17,7 +17,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   unitAndFunctionalTests:    
-    if: github.repository == 'eiffel-community/eiffel-intelligence'
+    if: github.repository == 'jainadc9/eiffel-intelligence'
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     env: 
@@ -46,7 +46,10 @@ jobs:
           source src/main/docker/env.bash
           docker-compose -f src/main/docker/docker-compose.yml up -d mongodb mongodb-auth rabbitmq eiffel-er mail-server
           sleep 60
-          
+
+      - name: Submit Dependency Snapshot
+        uses: advanced-security/maven-dependency-submission-action@v4
+        
       - name: Run unit and functional tests
         run: |
           mvn --version
