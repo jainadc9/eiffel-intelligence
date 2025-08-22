@@ -506,6 +506,30 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.6.0</version> <!-- Use the latest stable version -->
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>src/functionaltests/resources/openspec-api.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.ericsson.ei.eventrepository.api</apiPackage>
+                            <configOptions>
+                                <sourceFolder>src/functionaltests/java</sourceFolder>
+                                <useSpringController>true</useSpringController>
+                                <delegatePattern>true</delegatePattern>
+                            </configOptions>
+                        </configuration>
+                   </execution>
+               </executions>
+            </plugin>
+
             <!-- required for adding generated sources -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
