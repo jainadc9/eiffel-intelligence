@@ -30,6 +30,8 @@
         <springSessionVersion>2.5.0</springSessionVersion>
         <forkCountTests>1</forkCountTests>
         <jackson.version>2.14.1</jackson.version>
+        <openapi-generator-version>6.6.0</openapi-generator-version>
+        <openapi-test-package>com.ericsson.ei.test.generated</openapi-test-package>
     </properties>
 
     <!-- Reporting Plugins -->
@@ -442,6 +444,14 @@
            <artifactId>logback-core</artifactId>
            <version>1.2.13</version>
         </dependency>
+
+        <!-- OpenAPI Generator Dependencies -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+            <scope>test</scope>
+        </dependency>
 	    
     </dependencies>
 
@@ -506,6 +516,38 @@
                 </executions>
             </plugin>
 
+            <!-- OpenAPI Generator Plugin -->
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-test-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi-spec.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <library>resttemplate</library>
+                            <output>${project.build.directory}/generated-test-sources/openapi</output>
+                            <apiPackage>${openapi-test-package}.api</apiPackage>
+                            <modelPackage>${openapi-test-package}.model</modelPackage>
+                            <invokerPackage>${openapi-test-package}.client</invokerPackage>
+                            <generateApiTests>true</generateApiTests>
+                            <generateModelTests>true</generateModelTests>
+                            <configOptions>
+                                <dateLibrary>java8</dateLibrary>
+                                <java8>true</java8>
+                                <useJakartaEe>false</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- required for adding generated sources -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -527,7 +569,7 @@
 
                     <execution>
                         <id>add-test-source</id>
-                        <phase>generate-sources</phase>
+                        <phase>generate-test-sources</phase>
                         <goals>
                             <goal>add-test-source</goal>
                         </goals>
@@ -539,6 +581,8 @@
                                 <source>src/functionaltests/resources</source>
                                 <source>src/integrationtests/java</source>
                                 <source>src/integrationtests/resources</source>
+                                <source>${project.build.directory}/generated-test-sources/openapi/src/main/java</source>
+                                <source>${project.build.directory}/generated-test-sources/openapi/src/test/java</source>
                             </sources>
                         </configuration>
                     </execution>
