@@ -57,6 +57,7 @@ public class ERQueryServiceWithOpenAPITest {
         SpringApplication erApp = new SpringApplicationBuilder(OpenApiErApplication.class).build();
         Properties props = new Properties();
         props.put("server.port", String.valueOf(ER_PORT));
+        props.put("er.security.permitAll", "true");
         props.put("spring.autoconfigure.exclude",
                 "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,"
                 + "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration");
