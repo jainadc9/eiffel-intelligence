@@ -29,6 +29,7 @@ public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
     public Optional<NativeWebRequest> getRequest() {
         return Optional.empty();
     }
+
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final List<String> events = new ArrayList<>();
     private static final Map<String, JsonNode> eventsById = new LinkedHashMap<>();
