@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,8 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @Service
+@ConditionalOnProperty(name = "er.security.permitAll", havingValue = "true")
 public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
-
-    @Override
-    public Optional<NativeWebRequest> getRequest() {
-        return Optional.empty();
-    }
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final List<String> events = new ArrayList<>();
@@ -36,6 +33,11 @@ public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
 
     static {
         loadEventsFromDirectory("src/test/resources/eventrepository/events");
+    }
+
+    @Override
+    public Optional<NativeWebRequest> getRequest() {
+        return Optional.empty();
     }
 
     public static void loadEventsFromDirectory(String dir) {
