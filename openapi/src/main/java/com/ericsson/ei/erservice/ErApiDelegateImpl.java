@@ -134,43 +134,49 @@ public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        List<String> ult = searchParameters != null && searchParameters.getUlt() != null
-                ? searchParameters.getUlt() : Collections.emptyList();
-        List<String> dlt = searchParameters != null && searchParameters.getDlt() != null
-                ? searchParameters.getDlt() : Collections.emptyList();
+        List<String> ult = extractLinkTypes(searchParameters, true);
+        List<String> dlt = extractLinkTypes(searchParameters, false);
+        int maxLevels = normalizeParam(levels);
+        int maxEvents = normalizeParam(limit);
+        boolean useTree = Boolean.TRUE.equals(tree);
 
-        int maxLevels = (levels == null || levels <= 0) ? Integer.MAX_VALUE : levels;
-        int maxEvents = (limit == null || limit <= 0) ? Integer.MAX_VALUE : limit;
-
-        List<Object> upstream = new ArrayList<>();
-        List<Object> downstream = new ArrayList<>();
-
-        if (!ult.isEmpty()) {
-            Set<String> visited = new HashSet<>();
-            visited.add(id);
-            if (Boolean.TRUE.equals(tree)) {
-                List<Object> upTree = buildUpstreamTree(startEvent, ult, maxLevels, maxEvents, visited);
-                if (upTree != null) upstream = upTree;
-            } else {
-                collectUpstreamFlat(startEvent, ult, maxLevels, maxEvents, visited, upstream);
-            }
-        }
-
-        if (!dlt.isEmpty()) {
-            Set<String> visited = new HashSet<>();
-            visited.add(id);
-            if (Boolean.TRUE.equals(tree)) {
-                List<Object> downTree = buildDownstreamTree(startEvent, dlt, maxLevels, maxEvents, visited);
-                if (downTree != null) downstream = downTree;
-            } else {
-                collectDownstreamFlat(startEvent, dlt, maxLevels, maxEvents, visited, downstream);
-            }
-        }
+        List<Object> upstream = traverseLinks(id, startEvent, ult, maxLevels, maxEvents, useTree, true);
+        List<Object> downstream = traverseLinks(id, startEvent, dlt, maxLevels, maxEvents, useTree, false);
 
         SearchResponse response = new SearchResponse();
         response.setUpstreamLinkObjects(upstream);
         response.setDownstreamLinkObjects(downstream);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    private List<String> extractLinkTypes(SearchParameters params, boolean upstream) {
+        if (params == null) return Collections.emptyList();
+        List<String> types = upstream ? params.getUlt() : params.getDlt();
+        return types != null ? types : Collections.emptyList();
+    }
+
+    private int normalizeParam(Integer value) {
+        return (value == null || value <= 0) ? Integer.MAX_VALUE : value;
+    }
+
+    private List<Object> traverseLinks(String id, JsonNode startEvent, List<String> linkTypes,
+            int maxLevels, int maxEvents, boolean useTree, boolean upstream) {
+        if (linkTypes.isEmpty()) return new ArrayList<>();
+        Set<String> visited = new HashSet<>();
+        visited.add(id);
+        if (useTree) {
+            List<Object> tree = upstream
+                    ? buildUpstreamTree(startEvent, linkTypes, maxLevels, maxEvents, visited)
+                    : buildDownstreamTree(startEvent, linkTypes, maxLevels, maxEvents, visited);
+            return tree != null ? tree : new ArrayList<>();
+        }
+        List<Object> result = new ArrayList<>();
+        if (upstream) {
+            collectUpstreamFlat(startEvent, linkTypes, maxLevels, maxEvents, visited, result);
+        } else {
+            collectDownstreamFlat(startEvent, linkTypes, maxLevels, maxEvents, visited, result);
+        }
+        return result;
     }
 
     private List<Object> buildUpstreamTree(JsonNode event, List<String> linkTypes, int maxLevels, int maxEvents, Set<String> visited) {
@@ -179,21 +185,14 @@ public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
         List<Object> tree = new ArrayList<>();
         tree.add(mapper.convertValue(event, Map.class));
 
-        JsonNode links = event.get("links");
-        if (links != null && links.isArray()) {
-            for (JsonNode link : links) {
-                String type = link.has("type") ? link.get("type").asText() : "";
-                String target = link.has("target") ? link.get("target").asText() : "";
-                if (target.isEmpty() || !matchesLinkType(type, linkTypes)) continue;
-                if (visited.contains(target)) continue;
+        for (String target : getMatchingLinkTargets(event, linkTypes)) {
+            if (visited.contains(target)) continue;
+            JsonNode targetEvent = eventsById.get(target);
+            if (targetEvent == null) continue;
 
-                JsonNode targetEvent = eventsById.get(target);
-                if (targetEvent == null) continue;
-
-                visited.add(target);
-                List<Object> subtree = buildUpstreamTree(targetEvent, linkTypes, maxLevels - 1, maxEvents, visited);
-                if (subtree != null) tree.add(subtree);
-            }
+            visited.add(target);
+            List<Object> subtree = buildUpstreamTree(targetEvent, linkTypes, maxLevels - 1, maxEvents, visited);
+            if (subtree != null) tree.add(subtree);
         }
         return tree;
     }
@@ -209,41 +208,39 @@ public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
             String candidateId = entry.getKey();
             if (visited.contains(candidateId)) continue;
 
-            JsonNode candidate = entry.getValue();
-            JsonNode links = candidate.get("links");
-            if (links == null || !links.isArray()) continue;
-
-            for (JsonNode link : links) {
-                String type = link.has("type") ? link.get("type").asText() : "";
-                String target = link.has("target") ? link.get("target").asText() : "";
-                if (eventId.equals(target) && matchesLinkType(type, linkTypes)) {
-                    visited.add(candidateId);
-                    List<Object> subtree = buildDownstreamTree(candidate, linkTypes, maxLevels - 1, maxEvents, visited);
-                    if (subtree != null) tree.add(subtree);
-                    break;
-                }
+            if (hasLinkTo(entry.getValue(), eventId, linkTypes)) {
+                visited.add(candidateId);
+                List<Object> subtree = buildDownstreamTree(entry.getValue(), linkTypes, maxLevels - 1, maxEvents, visited);
+                if (subtree != null) tree.add(subtree);
             }
         }
         return tree;
     }
 
-    private void collectUpstreamFlat(JsonNode event, List<String> linkTypes, int maxLevels, int maxEvents, Set<String> visited, List<Object> result) {
-        if (maxLevels <= 0 || result.size() >= maxEvents) return;
-        JsonNode links = event.get("links");
-        if (links == null || !links.isArray()) return;
-
+    private boolean hasLinkTo(JsonNode candidate, String targetId, List<String> linkTypes) {
+        JsonNode links = candidate.get("links");
+        if (links == null || !links.isArray()) return false;
         for (JsonNode link : links) {
             String type = link.has("type") ? link.get("type").asText() : "";
             String target = link.has("target") ? link.get("target").asText() : "";
-            if (target.isEmpty() || !matchesLinkType(type, linkTypes)) continue;
-            if (visited.contains(target)) continue;
+            if (targetId.equals(target) && matchesLinkType(type, linkTypes)) return true;
+        }
+        return false;
+    }
 
-            JsonNode targetEvent = eventsById.get(target);
+    private void collectUpstreamFlat(JsonNode event, List<String> linkTypes, int maxLevels, int maxEvents, Set<String> visited, List<Object> result) {
+        if (maxLevels <= 0 || result.size() >= maxEvents) return;
+
+        for (String targetId : getMatchingLinkTargets(event, linkTypes)) {
+            if (visited.contains(targetId)) continue;
+            JsonNode targetEvent = eventsById.get(targetId);
             if (targetEvent == null) continue;
 
-            visited.add(target);
+            visited.add(targetId);
             result.add(mapper.convertValue(targetEvent, Map.class));
-            collectUpstreamFlat(targetEvent, linkTypes, maxLevels - 1, maxEvents, visited, result);
+            if (result.size() < maxEvents) {
+                collectUpstreamFlat(targetEvent, linkTypes, maxLevels - 1, maxEvents, visited, result);
+            }
         }
     }
 
@@ -253,24 +250,27 @@ public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
 
         for (Map.Entry<String, JsonNode> entry : eventsById.entrySet()) {
             if (result.size() >= maxEvents) break;
-            String candidateId = entry.getKey();
-            if (visited.contains(candidateId)) continue;
+            if (visited.contains(entry.getKey())) continue;
+            if (!hasLinkTo(entry.getValue(), eventId, linkTypes)) continue;
 
-            JsonNode candidate = entry.getValue();
-            JsonNode links = candidate.get("links");
-            if (links == null || !links.isArray()) continue;
+            visited.add(entry.getKey());
+            result.add(mapper.convertValue(entry.getValue(), Map.class));
+            collectDownstreamFlat(entry.getValue(), linkTypes, maxLevels - 1, maxEvents, visited, result);
+        }
+    }
 
-            for (JsonNode link : links) {
-                String type = link.has("type") ? link.get("type").asText() : "";
-                String target = link.has("target") ? link.get("target").asText() : "";
-                if (eventId.equals(target) && matchesLinkType(type, linkTypes)) {
-                    visited.add(candidateId);
-                    result.add(mapper.convertValue(candidate, Map.class));
-                    collectDownstreamFlat(candidate, linkTypes, maxLevels - 1, maxEvents, visited, result);
-                    break;
-                }
+    private List<String> getMatchingLinkTargets(JsonNode event, List<String> linkTypes) {
+        List<String> targets = new ArrayList<>();
+        JsonNode links = event.get("links");
+        if (links == null || !links.isArray()) return targets;
+        for (JsonNode link : links) {
+            String type = link.has("type") ? link.get("type").asText() : "";
+            String target = link.has("target") ? link.get("target").asText() : "";
+            if (!target.isEmpty() && matchesLinkType(type, linkTypes)) {
+                targets.add(target);
             }
         }
+        return targets;
     }
 
     private boolean matchesLinkType(String type, List<String> allowedTypes) {
