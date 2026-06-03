@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +28,13 @@ import java.util.*;
 @Service
 @ConditionalOnProperty(name = "er.security.permitAll", havingValue = "true")
 public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ErApiDelegateImpl.class);
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final List<String> events = new ArrayList<>();
     private static final Map<String, JsonNode> eventsById = new LinkedHashMap<>();
 
     static {
-        loadEventsFromDirectory("src/test/resources/eventrepository/events");
+        loadEventsFromClasspath("eventrepository/events");
     }
 
     @Override
@@ -40,27 +42,28 @@ public class ErApiDelegateImpl implements EventsApiDelegate, SearchApiDelegate {
         return Optional.empty();
     }
 
-    public static void loadEventsFromDirectory(String dir) {
+    public static void loadEventsFromClasspath(String resourceDir) {
         events.clear();
         eventsById.clear();
-        File directory = new File(dir);
-        if (!directory.exists() || !directory.isDirectory()) return;
-        File[] files = directory.listFiles();
-        if (files == null) return;
+        try {
+            java.net.URL url = ClassLoader.getSystemResource(resourceDir);
+            if (url == null) return;
+            File directory = new File(url.toURI());
+            File[] files = directory.listFiles();
+            if (files == null) return;
 
-        for (File file : files) {
-            if (!file.isFile() || !file.getName().endsWith(".json")) continue;
-            try {
-                String content = Files.readString(Paths.get(file.getAbsolutePath()));
+            for (File file : files) {
+                if (!file.isFile() || !file.getName().endsWith(".json")) continue;
+                String content = Files.readString(file.toPath());
                 events.add(content);
                 JsonNode event = mapper.readTree(content);
                 String id = event.at("/meta/id").asText();
                 if (!id.isEmpty()) {
                     eventsById.put(id, event);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            LOGGER.error("Failed to load events from classpath", e);
         }
     }
 

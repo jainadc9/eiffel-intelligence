@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class ErSecurityConfig {
     @Bean
     public SecurityFilterChain erFilterChain(HttpSecurity http) throws Exception {
+        // CSRF disabled intentionally: this is a test-only mock ER service, not production code
         http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .csrf(csrf -> csrf.disable());
         return http.build();
